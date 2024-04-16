@@ -88,18 +88,6 @@ function onOpenRemoveDialog(locId) {
   const elBackdrop = document.querySelector('.backdrop')
   elBackdrop.classList.remove('hidden')
   renderRemoveDialog(locId)
-  return
-  locService
-    .remove(locId)
-    .then(() => {
-      flashMsg('Location removed')
-      unDisplayLoc()
-      loadAndRenderLocs()
-    })
-    .catch((err) => {
-      console.error('OOPs:', err)
-      flashMsg('Cannot remove location')
-    })
 }
 
 function onSearchAddress(ev) {
