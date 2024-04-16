@@ -93,9 +93,11 @@ function onOpenRemoveDialog(locId) {
 function onSearchAddress(ev) {
   ev.preventDefault()
   const el = document.querySelector('[name=address]')
+
   mapService
     .lookupAddressGeo(el.value)
     .then((geo) => {
+      console.log(geo)
       mapService.panTo(geo)
     })
     .catch((err) => {
@@ -260,6 +262,17 @@ function onSetFilterBy({ txt, minRate }) {
   const filterBy = locService.setFilterBy({ txt, minRate: +minRate })
   utilService.updateQueryParams(filterBy)
   loadAndRenderLocs()
+  // onSearchAddress(ev)
+  mapService
+    .lookupAddressGeo(txt)
+    .then((geo) => {
+      // console.log(geo)
+      mapService.panTo(geo)
+    })
+    .catch((err) => {
+      console.error('OOPs:', err)
+      flashMsg('Cannot lookup address')
+    })
 }
 
 function renderLocStats() {
