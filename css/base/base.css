@@ -2,12 +2,16 @@ body {
     background-color: var(--bg1);
     color: #eee;
     overflow-x: hidden;
+
+
 }
 
 header {
     background-color: var(--bg2);
     color: aliceblue;
     padding: 0.3em;
+
+    border-radius: .5em;
 }
 
 header h1 {
