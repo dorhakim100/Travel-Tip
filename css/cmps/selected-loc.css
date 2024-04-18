@@ -8,6 +8,10 @@
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 }
 
+.selected-loc span {
+    margin-inline: 1em;
+}
+
 .selected-loc.show {
     height: auto;
     max-height: 15em;

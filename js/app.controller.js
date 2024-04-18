@@ -18,7 +18,10 @@ window.app = {
   onSetFilterBy,
   onCloseDialog,
   removeLoc,
+  loadAndRenderLocs
 }
+
+let gUserPos = null
 
 function onInit() {
   loadAndRenderLocs()
@@ -40,31 +43,29 @@ function renderLocs(locs) {
   // console.log('locs:', locs)
   var strHTML = locs
     .map((loc) => {
+      console.log(locs)
       const className = loc.id === selectedLocId ? 'active' : ''
       return `
         <li class="loc ${className}" data-id="${loc.id}">
             <h4>  
                 <span>${loc.name}</span>
+                <span class="distance">Distance: ${(loc.distance) ? loc.distance + ` KM`: ``}</span>
                 <span title="${loc.rate} stars">${'★'.repeat(loc.rate)}</span>
             </h4>
             <p class="muted">
                 Created: ${utilService.elapsedTime(loc.createdAt)}
-                ${
-                  loc.createdAt !== loc.updatedAt
-                    ? ` | Updated: ${utilService.elapsedTime(loc.updatedAt)}`
-                    : ''
-                }
+                ${loc.createdAt !== loc.updatedAt
+          ? ` | Updated: ${utilService.elapsedTime(loc.updatedAt)}`
+          : ''
+        }
             </p>
             <div class="loc-btns">     
-               <button title="Delete" onclick="app.onOpenRemoveDialog('${
-                 loc.id
-               }')">🗑️</button>
-               <button title="Edit" onclick="app.onUpdateLoc('${
-                 loc.id
-               }')">✏️</button>
-               <button title="Select" onclick="app.onSelectLoc('${
-                 loc.id
-               }')">🗺️</button>
+               <button title="Delete" onclick="app.onOpenRemoveDialog('${loc.id
+        }')">🗑️</button>
+               <button title="Edit" onclick="app.onUpdateLoc('${loc.id
+        }')">✏️</button>
+               <button title="Select" onclick="app.onSelectLoc('${loc.id
+        }')">🗺️</button>
             </div>     
         </li>`
     })
@@ -123,6 +124,7 @@ function onAddLoc(geo) {
   const loc = {
     name: locName,
     rate: +prompt(`Rate (1-5)`, '3'),
+    distance: null,
     geo,
   }
   locService
@@ -152,6 +154,9 @@ function onPanToUserPos() {
   mapService
     .getUserPosition()
     .then((latLng) => {
+      gUserPos = latLng
+      calcDistances()
+
       mapService.panTo({ ...latLng, zoom: 15 })
       unDisplayLoc()
       loadAndRenderLocs()
@@ -160,6 +165,18 @@ function onPanToUserPos() {
     .catch((err) => {
       console.error('OOPs:', err)
       flashMsg('Cannot get your position')
+    })
+}
+
+function calcDistances() {
+  locService.query()
+    .then(locations => {
+        locations.map((location) => {
+            location.distance = utilService.getDistance(gUserPos, location.geo, 'K')
+            //document.querySelectorAll('li h4 .distance')[idx].innerText = `Distance: ${location.distance} KM`
+            locService.save(location)
+            return
+          })
     })
 }
 
@@ -201,6 +218,7 @@ function displayLoc(loc) {
 
   const el = document.querySelector('.selected-loc')
   el.querySelector('.loc-name').innerText = loc.name
+  el.querySelector('.loc-distance').innerText = loc.distance + ' KM'
   el.querySelector('.loc-address').innerText = loc.geo.address
   el.querySelector('.loc-rate').innerHTML = '★'.repeat(loc.rate)
   el.querySelector('[name=loc-copier]').value = window.location
