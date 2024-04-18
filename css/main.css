@@ -4,7 +4,7 @@
 @import url(cmps/locs.css);
 @import url(cmps/selected-loc.css);
 
-@media (min-width: 750px) {
+@media (min-width: 800px) {
     main {
         display: flex;
         flex-direction: row-reverse;
@@ -14,3 +14,29 @@
     }
 }
 
+@media (max-width: 800px) {
+    main{
+        display: block;
+    }
+
+    .map{
+        width: 80vw;
+
+        margin: auto;
+    } 
+    .user-interface-container{
+        width: 100vw;
+    }
+
+    .locs-container{
+        width: 90vw;
+
+    }
+    
+}
+@media (max-width:400px) {
+    .map{
+        width: 50vw;
+        height: 50vh;
+    }
+}

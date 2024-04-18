@@ -88,26 +88,16 @@ function onOpenRemoveDialog(locId) {
   const elBackdrop = document.querySelector('.backdrop')
   elBackdrop.classList.remove('hidden')
   renderRemoveDialog(locId)
-  return
-  locService
-    .remove(locId)
-    .then(() => {
-      flashMsg('Location removed')
-      unDisplayLoc()
-      loadAndRenderLocs()
-    })
-    .catch((err) => {
-      console.error('OOPs:', err)
-      flashMsg('Cannot remove location')
-    })
 }
 
 function onSearchAddress(ev) {
   ev.preventDefault()
   const el = document.querySelector('[name=address]')
+
   mapService
     .lookupAddressGeo(el.value)
     .then((geo) => {
+      console.log(geo)
       mapService.panTo(geo)
     })
     .catch((err) => {
@@ -272,16 +262,31 @@ function onSetFilterBy({ txt, minRate }) {
   const filterBy = locService.setFilterBy({ txt, minRate: +minRate })
   utilService.updateQueryParams(filterBy)
   loadAndRenderLocs()
+  // onSearchAddress(ev)
+  mapService
+    .lookupAddressGeo(txt)
+    .then((geo) => {
+      // console.log(geo)
+      mapService.panTo(geo)
+    })
+    .catch((err) => {
+      console.error('OOPs:', err)
+      flashMsg('Cannot lookup address')
+    })
 }
 
 function renderLocStats() {
   locService.getLocCountByRateMap().then((stats) => {
     handleStats(stats, 'loc-stats-rate')
+    handleStats(stats, 'loc-stats-update')
+  })
+  calcTimeStats().then((res) => {
+    const stats = res
+    handleStats(stats, 'loc-stats-update')
   })
 }
 
 function handleStats(stats, selector) {
-  // stats = { low: 37, medium: 11, high: 100, total: 148 }
   // stats = { low: 5, medium: 5, high: 5, baba: 55, mama: 30, total: 100 }
   const labels = cleanStats(stats)
   const colors = utilService.getColors()
@@ -333,6 +338,32 @@ function cleanStats(stats) {
 }
 
 //
+
+function calcTimeStats() {
+  return locService.query().then((res) => {
+    let stats = { today: 0, past: 0, never: 0, total: 0 }
+    stats.total = res.length
+    res.forEach((place) => {
+      console.log(place)
+      if (!place.updatedAt) {
+        stats.never++
+        return
+      }
+      const updatedAt = place.updatedAt / 1000 / 60 / 60
+      const dateNow = Date.now() / 1000 / 60 / 60
+      console.log('Hours: ', dateNow)
+      const hoursSinceUpdated = dateNow - updatedAt
+      console.log('hoursSinceUpdated:', hoursSinceUpdated)
+      if (hoursSinceUpdated < 24) {
+        stats.today++
+      } else if (hoursSinceUpdated > 24) {
+        stats.past++
+      }
+    })
+    // console.log(stats)
+    return stats
+  })
+}
 
 function onCloseDialog() {
   closeDialog()
