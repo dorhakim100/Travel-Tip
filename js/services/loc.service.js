@@ -118,7 +118,6 @@ function _createDemoLocs() {
             {
                 name: "Ben Gurion Airport",
                 rate: 2,
-                distance: null,
                 geo: {
                     address: "Ben Gurion Airport, 7015001, Israel",
                     lat: 32.0004465,
@@ -129,7 +128,6 @@ function _createDemoLocs() {
             {
                 name: "Dekel Beach",
                 rate: 4,
-                distance: null,
                 geo: {
                     address: "Derekh Mitsrayim 1, Eilat, 88000, Israel",
                     lat: 29.5393848,
@@ -140,7 +138,6 @@ function _createDemoLocs() {
             {
                 name: "Dahab, Egypt",
                 rate: 5,
-                distance: null,
                 geo: {
                     address: "Dahab, South Sinai, Egypt",
                     lat: 28.5096676,
