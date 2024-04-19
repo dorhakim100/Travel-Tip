@@ -18,7 +18,10 @@ window.app = {
   onSetFilterBy,
   onCloseDialog,
   removeLoc,
+  loadAndRenderLocs
 }
+
+let gUserPos = null
 
 function onInit() {
   loadAndRenderLocs()
@@ -41,30 +44,28 @@ function renderLocs(locs) {
   var strHTML = locs
     .map((loc) => {
       const className = loc.id === selectedLocId ? 'active' : ''
+      const distance = gUserPos ? 'Distance: ' + utilService.getDistance(gUserPos, loc.geo, 'K')  + ' KM': ''
       return `
         <li class="loc ${className}" data-id="${loc.id}">
             <h4>  
                 <span>${loc.name}</span>
+                <span class="distance">${distance}</span>
                 <span title="${loc.rate} stars">${'★'.repeat(loc.rate)}</span>
             </h4>
             <p class="muted">
                 Created: ${utilService.elapsedTime(loc.createdAt)}
-                ${
-                  loc.createdAt !== loc.updatedAt
-                    ? ` | Updated: ${utilService.elapsedTime(loc.updatedAt)}`
-                    : ''
-                }
+                ${loc.createdAt !== loc.updatedAt
+          ? ` | Updated: ${utilService.elapsedTime(loc.updatedAt)}`
+          : ''
+        }
             </p>
             <div class="loc-btns">     
-               <button title="Delete" onclick="app.onOpenRemoveDialog('${
-                 loc.id
-               }')">🗑️</button>
-               <button title="Edit" onclick="app.onUpdateLoc('${
-                 loc.id
-               }')">✏️</button>
-               <button title="Select" onclick="app.onSelectLoc('${
-                 loc.id
-               }')">🗺️</button>
+               <button title="Delete" onclick="app.onOpenRemoveDialog('${loc.id
+        }')">🗑️</button>
+               <button title="Edit" onclick="app.onUpdateLoc('${loc.id
+        }')">✏️</button>
+               <button title="Select" onclick="app.onSelectLoc('${loc.id
+        }')">🗺️</button>
             </div>     
         </li>`
     })
@@ -142,6 +143,8 @@ function onPanToUserPos() {
   mapService
     .getUserPosition()
     .then((latLng) => {
+      gUserPos = latLng
+
       mapService.panTo({ ...latLng, zoom: 15 })
       unDisplayLoc()
       loadAndRenderLocs()
@@ -189,8 +192,11 @@ function displayLoc(loc) {
   mapService.panTo(loc.geo)
   mapService.setMarker(loc)
 
+  const distance = gUserPos ? 'Distance: ' + utilService.getDistance(gUserPos, loc.geo, 'K')  + ' KM': ''
+
   const el = document.querySelector('.selected-loc')
   el.querySelector('.loc-name').innerText = loc.name
+  el.querySelector('.loc-distance').innerText = distance
   el.querySelector('.loc-address').innerText = loc.geo.address
   el.querySelector('.loc-rate').innerHTML = '★'.repeat(loc.rate)
   el.querySelector('[name=loc-copier]').value = window.location
